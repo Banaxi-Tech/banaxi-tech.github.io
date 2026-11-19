@@ -1,35 +1,144 @@
 ---
-title: Testing in QEMU
-description: Try W32Eleven in QEMU on an emulated 32-bit PC, from a DVD or a USB stick.
+title: Running in QEMU
+description: Run W32Eleven and Windows 11 in a QEMU virtual machine that behaves like a 32-bit PC, without real 32-bit hardware.
 ---
 
-import { Tabs, TabItem } from '@astrojs/starlight/components';
+import { Steps, Tabs, TabItem } from '@astrojs/starlight/components';
 
-QEMU's `qemu-system-i386` with KVM behaves like a 32-bit PC and is the quickest way to try W32Eleven.
+You don't need a real 32-bit PC to try W32Eleven. QEMU's `qemu-system-i386` emulates a 32-bit PC: its CPU has no
+64-bit mode, so Windows 11 can only run on it through W32Eleven, exactly as on old hardware. With KVM it runs at
+nearly the host CPU's speed, so it's the quickest way to try W32Eleven, and the way it is developed and tested.
+
+:::note[Why not qemu-system-x86_64?]
+A 64-bit virtual machine runs Windows 11 natively, so W32Eleven would have nothing to do. Use `qemu-system-i386`.
+:::
+
+## What you need
+
+- A Linux PC with KVM (`/dev/kvm` exists and you can access it)
+- QEMU with the i386 target (`qemu-system-i386`)
+- A patched ISO from [Making the boot media](/w32eleven/boot-media/)
+- About 70 GB of free disk space for the virtual disk
+
+Other hosts (Windows with WHPX, macOS with HVF) may work too but are untested. Without hardware acceleration QEMU
+emulates the CPU in software, and W32Eleven running on top of that is far too slow to use.
+
+## Install Windows
+
+<Steps>
+
+1. Create a virtual hard disk. Windows 11 needs at least 64 GB. The file only takes up the space Windows actually
+   writes.
+
+   ```sh
+   qemu-img create -f qcow2 win11.qcow2 64G
+   ```
+
+2. Start the virtual machine with the patched ISO in its DVD drive.
+
+   ```sh
+   qemu-system-i386 -enable-kvm -cpu host -m 3G \
+     -drive file=win11.qcow2,if=ide,index=0 \
+     -cdrom Win11_w32eleven.iso
+   ```
+
+3. In the boot menu, choose **AUTOMATIC install** for a hands-off installation, or the first entry for Setup's
+   graphical installer. See [Installing Windows](/w32eleven/installing/).
+
+   :::tip
+   The menu waits 5 seconds. Press an arrow key to stop the countdown.
+   :::
+
+4. Wait. Expect several hours. The window shows the emulated PC's screen the whole time, and Windows restarts a
+   few times on its own: W32Eleven handles those restarts itself, so the QEMU window stays open.
+
+5. When the desktop appears, Windows is installed.
+
+</Steps>
+
+## Start the installed Windows
+
+Keep the ISO in the virtual DVD drive and start QEMU with the same command. The boot menu's default entry starts
+Windows from the virtual disk.
+
+:::caution[Don't press a key at "Press any key to boot from CD or DVD"]
+The emulated PC first offers the Windows DVD. Leave it alone for a few seconds and it starts Windows from the disk.
+Pressing a key there starts Windows Setup again.
+:::
+
+To start without the ISO, boot it once more, choose **Install the W32Eleven boot loader on the hard disk**, and
+from then on leave out the `-cdrom` line:
 
 ```sh
-truncate -s 64G disk.img
+qemu-system-i386 -enable-kvm -cpu host -m 3G \
+  -drive file=win11.qcow2,if=ide,index=0
 ```
 
+## Options
+
+### Memory
+
+`-m 3G` is the useful maximum. A 32-bit PC only sees the RAM below its PCI address range, so anything above about
+3.5 GB is invisible to it, and W32Eleven keeps a part for itself. Windows ends up with about 2.8 GB.
+
+### Booting from a USB stick
+
+To test the USB path a real PC would use, attach the ISO as a USB stick instead of a DVD:
+
+```sh
+qemu-system-i386 -enable-kvm -cpu host -m 3G \
+  -device usb-ehci,id=ehci \
+  -drive id=stick,file=Win11_w32eleven.iso,if=none,format=raw,readonly=on \
+  -device usb-storage,bus=ehci.0,drive=stick,bootindex=0 \
+  -drive file=win11.qcow2,if=ide,index=0
+```
+
+### SATA (AHCI) instead of IDE
+
 <Tabs>
-  <TabItem label="DVD">
+  <TabItem label="IDE (default)">
   ```sh
-  qemu-system-i386 -enable-kvm -cpu host -m 3G \
-    -cdrom Win11_w32eleven.iso \
-    -drive file=disk.img,format=raw,if=ide,index=0
+  -drive file=win11.qcow2,if=ide,index=0
   ```
   </TabItem>
-  <TabItem label="USB stick">
+  <TabItem label="AHCI">
   ```sh
-  qemu-system-i386 -enable-kvm -cpu host -m 3G \
-    -device usb-ehci,id=ehci \
-    -drive id=stick,file=Win11_w32eleven.iso,if=none,format=raw,readonly=on \
-    -device usb-storage,bus=ehci.0,drive=stick,bootindex=0 \
-    -drive file=disk.img,format=raw,if=ide,index=0
+  -device ahci,id=ahci \
+  -drive id=disk,file=win11.qcow2,if=none \
+  -device ide-hd,drive=disk,bus=ahci.0
   ```
   </TabItem>
 </Tabs>
 
-:::tip
-More than 3 GB of RAM brings nothing: a 32-bit PC only sees the RAM below its PCI address range.
-:::
+W32Eleven finds the disk either way. Windows always sees an IDE disk, whatever the virtual machine uses.
+
+### Speed
+
+W32Eleven runs on one CPU core, so the speed of that one core is what counts. On CPUs with performance and
+efficiency cores, pin QEMU to a performance core:
+
+```sh
+taskset -c 2 qemu-system-i386 ...
+```
+
+## Mouse and keyboard
+
+Click into the QEMU window to give it the mouse, and press <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>G</kbd> to release
+it again. The emulated PC has a PS/2 mouse, which moves relative to its last position: the pointer inside Windows
+can drift away from your own. Moving it into a screen corner lines them up again.
+
+## Shutting down
+
+When Windows shuts down, W32Eleven stops and the QEMU window keeps showing the last screen. Close the window or
+press <kbd>Ctrl</kbd>+<kbd>C</kbd> in the terminal.
+
+## Snapshots
+
+With a qcow2 disk you can save the installed state and go back to it later:
+
+```sh
+qemu-img snapshot -c installed win11.qcow2    # save (QEMU must not be running)
+qemu-img snapshot -a installed win11.qcow2    # go back
+```
+
+Adding `-snapshot` to the QEMU command discards everything Windows writes when QEMU exits.
