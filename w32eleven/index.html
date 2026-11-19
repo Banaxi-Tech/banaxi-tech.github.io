@@ -1,0 +1,392 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>W32Eleven Documentation</title>
+<meta name="description" content="W32Eleven runs 64-bit Windows 11 on 32-bit x86 PCs: a bare-metal x86-64 emulator with a JIT, booted from a patched Windows DVD or USB stick.">
+<style>
+:root{
+  --bg:#fbfbfa;--panel:#ffffff;--fg:#1d1d1f;--muted:#5d6370;--line:#e4e4e1;
+  --accent:#0b62c4;--accent-soft:#e8f1fc;--code-bg:#f2f2ef;--warn:#9a5b00;--warn-bg:#fff6e5;--on-accent:#fff;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#121315;--panel:#191a1d;--fg:#e8e8ea;--muted:#9da3ae;--line:#2a2c31;
+  --accent:#5aa2f5;--accent-soft:#16263a;--code-bg:#1f2125;--warn:#f0b35a;--warn-bg:#2a2112;--on-accent:#0a1626;}}
+:root[data-theme="dark"]{
+  --bg:#121315;--panel:#191a1d;--fg:#e8e8ea;--muted:#9da3ae;--line:#2a2c31;
+  --accent:#5aa2f5;--accent-soft:#16263a;--code-bg:#1f2125;--warn:#f0b35a;--warn-bg:#2a2112;--on-accent:#0a1626;}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:16px}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.65 var(--sans);-webkit-text-size-adjust:100%}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+.layout{display:grid;grid-template-columns:250px minmax(0,1fr);max-width:1180px;margin:0 auto}
+nav.toc{position:sticky;top:0;align-self:start;height:100vh;overflow:auto;padding:28px 18px 28px 24px;border-right:1px solid var(--line);font-size:14px}
+nav.toc .brand{font-weight:700;font-size:17px;color:var(--fg);display:block;margin-bottom:2px}
+nav.toc .sub{color:var(--muted);font-size:13px;margin-bottom:18px}
+nav.toc ol{list-style:none;margin:0;padding:0}
+nav.toc li a{display:block;padding:4px 8px;border-radius:6px;color:var(--muted)}
+nav.toc li a:hover{background:var(--accent-soft);color:var(--fg);text-decoration:none}
+main{padding:40px 48px 80px;min-width:0}
+header.hero h1{font-size:40px;line-height:1.15;margin:0 0 10px;letter-spacing:-.02em}
+header.hero p.lead{font-size:19px;color:var(--muted);margin:0 0 18px;max-width:46em}
+.links{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:8px}
+.btn{display:inline-block;padding:8px 14px;border-radius:8px;border:1px solid var(--line);background:var(--panel);color:var(--fg);font-size:14px;font-weight:600}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.btn:hover{text-decoration:none;border-color:var(--accent)}
+h2{font-size:26px;margin:56px 0 12px;padding-top:8px;border-top:1px solid var(--line);letter-spacing:-.01em}
+h3{font-size:19px;margin:30px 0 8px}
+p,ul,ol{max-width:48em}
+li{margin:3px 0}
+code{font-family:var(--mono);font-size:.88em;background:var(--code-bg);padding:.12em .38em;border-radius:5px}
+pre{font-family:var(--mono);font-size:13.5px;line-height:1.55;background:var(--code-bg);border:1px solid var(--line);border-radius:8px;padding:14px 16px;overflow:auto;max-width:100%}
+pre code{background:none;padding:0;font-size:inherit}
+.table-wrap{overflow-x:auto;max-width:100%;margin:14px 0}
+table{border-collapse:collapse;font-size:14.5px;min-width:520px}
+th,td{text-align:left;vertical-align:top;padding:8px 12px;border-bottom:1px solid var(--line)}
+th{font-weight:600;color:var(--muted);font-size:13px;text-transform:uppercase;letter-spacing:.03em}
+td code{white-space:nowrap}
+.note{border-left:3px solid var(--accent);background:var(--accent-soft);padding:10px 14px;border-radius:0 8px 8px 0;margin:16px 0;max-width:48em}
+.warn{border-left:3px solid var(--warn);background:var(--warn-bg);padding:10px 14px;border-radius:0 8px 8px 0;margin:16px 0;max-width:48em}
+.stack{font-family:var(--mono);font-size:13.5px;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:14px 16px;overflow:auto;white-space:pre;line-height:1.5}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin:18px 0;max-width:52em}
+.stat{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+.stat b{display:block;font-size:24px;letter-spacing:-.01em}
+.stat span{color:var(--muted);font-size:13.5px}
+figure{margin:20px 0}
+figure img{max-width:100%;height:auto;border-radius:8px;border:1px solid var(--line)}
+figcaption{color:var(--muted);font-size:13.5px;margin-top:6px}
+footer{margin-top:64px;padding-top:18px;border-top:1px solid var(--line);color:var(--muted);font-size:14px}
+.theme{position:fixed;top:12px;right:14px;z-index:5;padding:6px 10px;font-size:13px;border-radius:8px;border:1px solid var(--line);background:var(--panel);color:var(--fg);cursor:pointer}
+@media (max-width:900px){
+  .layout{display:block}
+  nav.toc{position:static;height:auto;border-right:0;border-bottom:1px solid var(--line);padding:20px 16px}
+  nav.toc ol{columns:2;column-gap:12px}
+  main{padding:28px 16px 64px}
+  header.hero h1{font-size:31px}
+  .theme{top:auto;bottom:14px}
+}
+</style>
+</head>
+<body>
+<button class="theme" id="theme" type="button" aria-label="Switch colour theme">Theme</button>
+<div class="layout">
+<nav class="toc" aria-label="Contents">
+  <a class="brand" href="#top">W32Eleven</a>
+  <div class="sub">Documentation</div>
+  <ol>
+    <li><a href="#overview">Overview</a></li>
+    <li><a href="#status">Status</a></li>
+    <li><a href="#requirements">Requirements</a></li>
+    <li><a href="#quick-start">Quick start</a></li>
+    <li><a href="#boot-menu">Boot menu</a></li>
+    <li><a href="#automatic-install">Automatic install</a></li>
+    <li><a href="#slim">Slim settings</a></li>
+    <li><a href="#boot-loader">Booting without the DVD</a></li>
+    <li><a href="#qemu">Trying it in QEMU</a></li>
+    <li><a href="#patch-tool">Patch tool reference</a></li>
+    <li><a href="#emulator-options">Emulator options</a></li>
+    <li><a href="#hardware">Real hardware</a></li>
+    <li><a href="#performance">Performance</a></li>
+    <li><a href="#how-it-works">How it works</a></li>
+    <li><a href="#troubleshooting">Troubleshooting</a></li>
+    <li><a href="#development">Development</a></li>
+    <li><a href="#license">License &amp; legal</a></li>
+  </ol>
+</nav>
+
+<main id="top">
+<header class="hero">
+  <h1>W32Eleven</h1>
+  <p class="lead">Run 64-bit Windows&nbsp;11 on a 32-bit PC. W32Eleven is an x86-64 PC emulator that runs
+  directly on the hardware of 32-bit x86 machines, boots from a patched Windows install DVD or USB stick,
+  and translates Windows' 64-bit code into 32-bit code with its own JIT.</p>
+  <div class="links">
+    <a class="btn primary" href="https://github.com/Banaxi-Tech/W32Eleven">Source on GitHub</a>
+    <a class="btn" href="#quick-start">Quick start</a>
+  </div>
+</header>
+
+<h2 id="overview">Overview</h2>
+<p>Windows&nbsp;11 only exists for 64-bit CPUs. W32Eleven makes it run on CPUs that can't execute 64-bit code
+at all (i386 or later with an x87 FPU; no SSE and no 64-bit mode needed) by emulating a complete x86-64 PC.
+Windows is not modified: it sees an ordinary 64-bit PC with a BIOS, a VGA card, IDE disks, ACPI and two CPUs.</p>
+<div class="stack">32-bit PC (for example a Core Duo or an Atom N450)
+└─ GRUB (from the patched DVD / USB stick, or from the hard disk after installing)
+   └─ W32Eleven, bare metal, i386 + x87 only
+      └─ emulated x86-64 PC: SeaBIOS, VGA, IDE, ACPI, APIC, 2 CPUs
+         └─ Windows 11 (unmodified)</div>
+<p>There is no Linux or other operating system underneath. The emulator is a small Multiboot kernel that
+GRUB loads directly, with its own drivers for disks, display and input.</p>
+
+<h2 id="status">Status</h2>
+<div class="table-wrap"><table>
+<thead><tr><th>Area</th><th>State</th></tr></thead>
+<tbody>
+<tr><td>Windows&nbsp;11 x64 (build 26300)</td><td>Boots through SeaBIOS, <code>bootmgr</code> and <code>winload</code>. Setup's graphical installer runs. The automatic install runs unattended from the DVD to the desktop, reboots included. The installed system boots to the desktop with the Start menu, Explorer and DWM composition.</td></tr>
+<tr><td>Bare-metal boot</td><td>Patched DVD or USB stick → GRUB → W32Eleven → Windows, tested on QEMU emulating a 32-bit PC (i386 + KVM). The installed disk boots through the emulator without the DVD.</td></tr>
+<tr><td>Real hardware</td><td><strong>Not tested yet.</strong> Reports are welcome.</td></tr>
+</tbody></table></div>
+<figure>
+  <img src="https://raw.githubusercontent.com/Banaxi-Tech/W32Eleven/main/docs/win11-start-menu.png" alt="The Windows 11 Start menu running inside W32Eleven" loading="lazy" width="1024" height="768">
+  <figcaption>The Windows&nbsp;11 Start menu, running inside W32Eleven.</figcaption>
+</figure>
+
+<h2 id="requirements">Requirements</h2>
+<h3>To build and patch (a Linux PC)</h3>
+<ul>
+  <li>GCC with 32-bit support (lib32 glibc for the 32-bit test harness), GNU ld, NASM, Python&nbsp;3, make</li>
+  <li>GRUB with i386-pc support (<code>grub-mkstandalone</code>) and <code>xorriso</code>, for the patch tool</li>
+  <li>SeaBIOS and the VGA BIOS (the patch tool uses QEMU's copies in <code>/usr/share/qemu/</code> by default)</li>
+  <li><code>qemu-system-i386</code> for testing (KVM recommended)</li>
+  <li>A Windows&nbsp;11 x64 ISO, downloaded from Microsoft</li>
+</ul>
+<h3>To run Windows (the 32-bit PC)</h3>
+<ul>
+  <li>A BIOS PC, or a UEFI PC with CSM / legacy boot enabled</li>
+  <li>An x86 CPU, i386 or later, with an x87 FPU</li>
+  <li>As much RAM as possible. Windows gets roughly what the PC can address below 4&nbsp;GB minus the emulator's
+  share (about 2.8&nbsp;GB on a 3&nbsp;GB machine).</li>
+  <li>A hard disk of at least 64&nbsp;GB for Windows&nbsp;11</li>
+  <li>A DVD drive, or a USB port the BIOS can boot from</li>
+</ul>
+
+<h2 id="quick-start">Quick start</h2>
+<h3>1. Build</h3>
+<pre><code>git clone https://github.com/Banaxi-Tech/W32Eleven.git
+cd W32Eleven
+make            # build/emulator.elf (bare metal), build/hosted, build/hosted32
+make test       # bare-metal self-tests on a QEMU 486</code></pre>
+<h3>2. Patch your Windows ISO</h3>
+<pre><code>python3 tools/w32-patch-iso.py Win11_x64.iso Win11_w32eleven.iso</code></pre>
+<p>This copies the ISO and appends the emulator, SeaBIOS, the VGA BIOS, two small answer-file CDs and a GRUB boot
+image. Everything already in the ISO stays byte for byte the same, including both file systems and the UEFI boot
+entry, so UEFI PCs still boot Windows natively from the same disc.</p>
+<h3>3. Write it to a DVD or USB stick</h3>
+<pre><code># USB stick (replace sdX with the stick; everything on it is erased)
+sudo dd if=Win11_w32eleven.iso of=/dev/sdX bs=4M status=progress conv=fsync</code></pre>
+<p>For a DVD, burn the ISO with any burning program. The image is hybrid, so the same file works for both.</p>
+<h3>4. Boot the 32-bit PC from it</h3>
+<p>Choose an entry in the boot menu (below). The first screen of Windows Setup takes several minutes to appear:
+the screen stays black or shows the Windows logo for a long time before that, which is normal.</p>
+
+<h2 id="boot-menu">Boot menu</h2>
+<div class="table-wrap"><table>
+<thead><tr><th>Entry</th><th>What it does</th></tr></thead>
+<tbody>
+<tr><td>Windows on W32Eleven – with this PC's hard disk</td><td>Windows Setup's graphical installer, with the PC's hard disk attached. This is the default.</td></tr>
+<tr><td>Windows on W32Eleven – CD only</td><td>The same, with no disk access, for trying it out safely.</td></tr>
+<tr><td><strong>AUTOMATIC install – ERASES the first hard disk</strong></td><td>Installs Windows&nbsp;11 Pro with no questions asked. See <a href="#automatic-install">Automatic install</a>.</td></tr>
+<tr><td>Install the W32Eleven boot loader on the hard disk</td><td>After Windows is installed: puts GRUB and the emulator into the first megabyte of the disk, so the PC starts Windows without the DVD. See <a href="#boot-loader">Booting without the DVD</a>.</td></tr>
+<tr><td>Reboot</td><td>Restarts the PC.</td></tr>
+</tbody></table></div>
+<p>Setup's TPM, Secure Boot, RAM, CPU and storage checks are bypassed with Microsoft's documented
+<code>LabConfig</code> registry keys, from an <code>autounattend.xml</code> on a small virtual CD that only the
+emulated PC sees.</p>
+
+<h2 id="automatic-install">Automatic install</h2>
+<div class="warn"><strong>This erases the first hard disk without asking.</strong> Everything on it is lost.</div>
+<p>Instead of Setup's graphical installer, the automatic entry runs a script inside Windows' installer environment
+(WinPE):</p>
+<ol>
+  <li><code>diskpart</code> erases disk&nbsp;0 and creates one NTFS partition</li>
+  <li><code>dism</code> applies the Windows&nbsp;11 Pro image (the longest step)</li>
+  <li>the <a href="#slim">slim settings</a> are written into the new installation</li>
+  <li><code>bcdboot</code> installs the boot files</li>
+  <li>an answer file for the first start is copied in, and the PC restarts</li>
+</ol>
+<p>Windows then sets up its devices, restarts again, creates a local account called <strong>User</strong> without
+a password, and logs in automatically. There are no screens to click through: no Microsoft account, no network,
+no privacy questions. Expect several hours in total at the emulator's speed.</p>
+
+<h2 id="slim">Slim settings</h2>
+<p>By default the automatic install switches off the background work that makes Windows&nbsp;11 crawl on a slow
+machine. They are written into the installed system before its first start, so Windows never runs them at all.</p>
+<div class="table-wrap"><table>
+<thead><tr><th>Area</th><th>Switched off</th></tr></thead>
+<tbody>
+<tr><td>Services</td><td>SysMain (prefetching), Windows Search indexing, telemetry (DiagTrack, dmwappushservice), Maps, Microsoft Defender (antivirus, network inspection, boot driver)</td></tr>
+<tr><td>Visual effects</td><td>"Adjust for best performance": no animations, transparency, peek or shadows; windows are drawn as outlines while dragging</td></tr>
+<tr><td>Background activity</td><td>Background apps, widgets, suggested and silently installed apps, Edge staying open in the background</td></tr>
+<tr><td>Updates</td><td>Automatic Store app and Edge updates (Windows Update stays on)</td></tr>
+<tr><td>Power</td><td>Hibernation and fast startup; the display and sleep timeouts</td></tr>
+<tr><td>Scheduled jobs</td><td>Defrag, telemetry collection, Defender's scheduled scan, WinSAT</td></tr>
+</tbody></table></div>
+<div class="note">With Defender off the installed system has <strong>no antivirus</strong>. That suits old offline
+machines and testing. Patch with <code>--no-slim</code> to keep Windows' defaults.</div>
+<p>On an already installed system, most of these settings can be applied from an administrator command prompt.
+Windows refuses changes to Defender while it is running (Tamper Protection and the service keys' access lists), so
+Defender can only be switched off this way at install time or with the disk mounted elsewhere.</p>
+
+<h2 id="boot-loader">Booting without the DVD</h2>
+<p>After Windows is installed, boot the DVD once more and choose <strong>Install the W32Eleven boot loader on the
+hard disk</strong>. This writes GRUB, the emulator and its firmware into the unused area between the disk's
+partition table and its first partition (sectors 1–2046). From then on the PC starts Windows through the emulator
+directly from the disk.</p>
+<p>Windows never notices: when it reads that area, the emulator shows it the original contents. Partitions must
+start at sector 2048 or later, which is what Windows creates.</p>
+
+<h2 id="qemu">Trying it in QEMU</h2>
+<p>QEMU's <code>qemu-system-i386</code> with KVM behaves like a 32-bit PC and is the quickest way to try
+W32Eleven:</p>
+<pre><code>truncate -s 64G disk.img
+qemu-system-i386 -enable-kvm -cpu host -m 3G \
+  -cdrom Win11_w32eleven.iso \
+  -drive file=disk.img,format=raw,if=ide,index=0</code></pre>
+<p>To test booting from a USB stick instead, replace the <code>-cdrom</code> line with:</p>
+<pre><code>  -device usb-ehci,id=ehci \
+  -drive id=stick,file=Win11_w32eleven.iso,if=none,format=raw,readonly=on \
+  -device usb-storage,bus=ehci.0,drive=stick,bootindex=0</code></pre>
+<p>More than 3&nbsp;GB of RAM brings nothing: a 32-bit PC only sees the RAM below its PCI address range.</p>
+
+<h2 id="patch-tool">Patch tool reference</h2>
+<pre><code>python3 tools/w32-patch-iso.py IN.iso OUT.iso [options]
+python3 tools/w32-patch-iso.py --in-place IMAGE.iso [options]
+python3 tools/w32-patch-iso.py --restore IMAGE.iso</code></pre>
+<div class="table-wrap"><table>
+<thead><tr><th>Option</th><th>Meaning</th></tr></thead>
+<tbody>
+<tr><td><code>--in-place</code></td><td>Patch the image itself instead of writing a copy.</td></tr>
+<tr><td><code>--restore</code></td><td>Undo the patch: restores the boot catalog and the first sector, and truncates the image to its original size.</td></tr>
+<tr><td><code>--emulator FILE</code></td><td>Bare-metal emulator to embed (default <code>build/emulator.elf</code>).</td></tr>
+<tr><td><code>--bios FILE</code></td><td>SeaBIOS image for the emulated PC (default <code>/usr/share/qemu/bios.bin</code>).</td></tr>
+<tr><td><code>--vgabios FILE</code></td><td>VGA BIOS (default <code>/usr/share/qemu/vgabios-stdvga.bin</code>).</td></tr>
+<tr><td><code>--ram MIB</code></td><td>Guest RAM in MiB (default: everything the emulator can spare).</td></tr>
+<tr><td><code>--args "..."</code></td><td>Extra <a href="#emulator-options">emulator options</a> for every menu entry.</td></tr>
+<tr><td><code>--no-slim</code></td><td>Automatic install without the <a href="#slim">slim settings</a>.</td></tr>
+</tbody></table></div>
+<h3>What the patch changes</h3>
+<ul>
+  <li>The payload (emulator, firmware, answer files, disk boot loader and two GRUB images) is appended after the end of the ISO.</li>
+  <li>The El Torito boot catalog's BIOS entry points at the appended GRUB image. The original entry is saved, and the emulated PC still sees and boots it.</li>
+  <li>The ISO's unused first sector gets a boot sector and a partition entry (a hybrid MBR), so the same file boots from a USB stick.</li>
+</ul>
+
+<h2 id="emulator-options">Emulator options</h2>
+<p>The GRUB menu passes these on the emulator's command line. Add your own with the patch tool's
+<code>--args</code>, or edit an entry at boot time with GRUB's <kbd>e</kbd> key.</p>
+<div class="table-wrap"><table>
+<thead><tr><th>Option</th><th>Default</th><th>Meaning</th></tr></thead>
+<tbody>
+<tr><td><code>cpus=1|2</code></td><td>2</td><td>CPUs of the emulated PC. Both run time-sliced on one host core. Windows&nbsp;11 Setup requires two.</td></tr>
+<tr><td><code>cores=N</code></td><td>2</td><td>Core count reported in the SMBIOS tables.</td></tr>
+<tr><td><code>ram=MIB</code></td><td>all available</td><td>Guest RAM in MiB.</td></tr>
+<tr><td><code>hdd=ata</code></td><td>off</td><td>Attach the PC's first hard disk: IDE or AHCI, otherwise any hard disk the BIOS knows. Never the boot medium.</td></tr>
+<tr><td><code>cdrom=optional</code></td><td>required</td><td>Start even without a boot CD (used when booting from the hard disk).</td></tr>
+<tr><td><code>cdrom=bios</code></td><td>off</td><td>Read the boot medium through the BIOS even if a CD drive driver would work.</td></tr>
+<tr><td><code>install=1</code></td><td>0</td><td>Write the disk boot loader (the "Install the W32Eleven boot loader" entry).</td></tr>
+<tr><td><code>unattend=0</code></td><td>1</td><td>Don't attach the answer-file CD.</td></tr>
+<tr><td><code>jit=0</code></td><td>1</td><td>Interpreter only (much slower, for debugging).</td></tr>
+<tr><td><code>jitmb=N</code></td><td>256</td><td>Size of the JIT's code area in MiB.</td></tr>
+</tbody></table></div>
+
+<h2 id="hardware">Real hardware</h2>
+<ul>
+  <li><strong>Disks:</strong> the emulator has its own polled drivers for IDE / legacy-mode SATA and AHCI. Anything
+  else the BIOS can boot from (USB sticks, SATA in other modes, NVMe with CSM) is read through the PC's own BIOS,
+  by switching back to 16-bit real mode for each INT&nbsp;13h call.</li>
+  <li><strong>Display:</strong> the VESA graphics mode GRUB sets up (1024×768 preferred).</li>
+  <li><strong>Keyboard and mouse:</strong> PS/2. USB keyboards and mice work through the BIOS's legacy USB emulation.</li>
+  <li><strong>Network, sound and USB devices</strong> are not passed through to Windows yet.</li>
+</ul>
+<div class="note">W32Eleven hasn't been tested on real hardware yet. BIOSes differ more than QEMU's SeaBIOS,
+especially in their USB support. If you try it, please report what happened on GitHub.</div>
+
+<h2 id="performance">Performance</h2>
+<p>Measured in the development harness (<code>build/hosted32</code>, a 32-bit Linux process) on one performance
+core of an Intel i9-12900KF, booting an installed Windows&nbsp;11 (the first 60 billion guest instructions, from
+power-on to the desktop and services):</p>
+<div class="grid">
+  <div class="stat"><b>~525 MIPS</b><span>average over the whole 60-billion-instruction boot</span></div>
+  <div class="stat"><b>~1500 MIPS</b><span>best 5-billion-instruction stretch</span></div>
+  <div class="stat"><b>~2100 MIPS</b><span>peak (0.5-billion-instruction window)</span></div>
+  <div class="stat"><b>~45 MIPS</b><span>interpreter only, without the JIT</span></div>
+</div>
+<p>That's roughly 1/100 of native speed on a modern PC. A real 32-bit CPU is another 5–10× slower: Windows works,
+but slowly, and installing takes many hours. Fresh installations are at their slowest during the first hour, while
+Windows does its one-time background work; the <a href="#slim">slim settings</a> avoid most of it.</p>
+
+<h2 id="how-it-works">How it works</h2>
+<ul>
+  <li><strong>Interpreter</strong> (<code>src/emu/cpu.c</code>, <code>sse.c</code>, <code>x87.c</code>): real,
+  protected, compatibility and long mode; legacy, PAE and 4-level paging with a software TLB; lazy flags; x87, MMX,
+  and SSE through SSE4.2. SSE floating point matches the hardware bit for bit in the fuzzer.</li>
+  <li><strong>JIT</strong> (<code>src/emu/jit64.c</code>): translates x86-64 into i386 code. Superblocks across
+  conditional branches, inline TLB lookups, a stack-region check per block, lazy flags with dead-flag elimination,
+  block chaining, per-site indirect dispatch, separate hot and cold code. Whatever it doesn't translate runs in the
+  interpreter, and execution is step for step identical to the interpreter.</li>
+  <li><strong>The emulated PC</strong> (<code>src/emu/</code>): i440FX/PIIX chipset, PIC, PIT, CMOS clock, UART,
+  PS/2, IDE with ATAPI and bus-master DMA, local APICs and IOAPIC with two CPUs, generated ACPI tables, Bochs VBE
+  graphics, fw_cfg for SeaBIOS.</li>
+  <li><strong>The bare-metal host</strong> (<code>src/host/</code>): Multiboot kernel, ATA/ATAPI and AHCI drivers,
+  BIOS disk access through a real-mode thunk, VBE display, PS/2 passthrough.</li>
+  <li><strong>Deterministic time:</strong> the emulated clock is driven by the instruction count, so every run is
+  reproducible, which makes bugs reproducible too.</li>
+</ul>
+
+<h2 id="troubleshooting">Troubleshooting</h2>
+<h3>The screen stays black for minutes</h3>
+<p>Normal, especially before Setup's first screen and during the first start after installing. Also, unless the
+slim settings were applied, Windows turns the display off after a while: move the mouse.</p>
+<h3>Setup says the PC doesn't meet the requirements</h3>
+<p>Boot an entry from the patched disc, which attaches the answer file with the <code>LabConfig</code> bypasses,
+and keep <code>cpus=2</code>. Setup refuses PCs with fewer than two cores.</p>
+<h3>"Why did my PC restart?"</h3>
+<p>Windows shows this page after its first-start setup (OOBE) has failed several times. Choose <strong>Next</strong>
+to make it try again. If it keeps coming back, it's most likely an emulator bug: please report it with the crash
+reports from <code>C:\ProgramData\Microsoft\Windows\WER\ReportQueue</code>.</p>
+<h3>"No ATAPI CD/DVD drive with an ISO 9660 disc found"</h3>
+<p>The emulator couldn't find the boot medium. For USB sticks and unusual controllers it falls back to the BIOS
+automatically. Add <code>cdrom=bios</code> to force that path.</p>
+<h3>Everything is very slow</h3>
+<p>Expected: see <a href="#performance">Performance</a>. Give a fresh installation its first hour, use the
+automatic install's slim settings, and use the fastest 32-bit CPU you have.</p>
+
+<h2 id="development">Development</h2>
+<p><code>build/hosted</code> and <code>build/hosted32</code> run the same emulator as a Linux process:</p>
+<pre><code>build/hosted32 --ram 2048 --bios /usr/share/qemu/bios.bin \
+  --vgabios /usr/share/qemu/vgabios-stdvga.bin --hda win11.img --snapshot \
+  --insns 60000000000 --hash</code></pre>
+<p>Its options include <code>--iso</code>, <code>--cdrom</code>, <code>--hda</code>, <code>--snapshot</code>
+(writes go to a temporary overlay), <code>--insns N</code>, <code>--hash</code> and <code>--hash-every N</code>
+(guest state hashes for comparing runs), <code>--shot</code>, <code>--no-jit</code>, and <code>--ctl FIFO</code>
+(drive a running guest: <code>press tab enter</code>, <code>type hello</code>, <code>mouse 10 -5 1</code>,
+<code>shot out.png</code>, <code>stop</code>).</p>
+<h3>Tests</h3>
+<pre><code>make jit-check       # interpreter vs JIT: identical guest state
+make cpufuzz         # random instructions: host CPU vs emulator
+make boot-test       # KleinOS ISO on the bare-metal image (KVM)
+make boot-test-486   # the same on QEMU's software 486</code></pre>
+<p>Every JIT change is checked by running Windows with <code>--hash-every 1000000000</code> for 60 billion
+instructions and comparing all 60 checkpoints (RAM, framebuffer and registers) against an interpreter-only run.</p>
+
+<h2 id="license">License &amp; legal</h2>
+<p>W32Eleven is free software under the
+<a href="https://github.com/Banaxi-Tech/W32Eleven/blob/main/LICENSE">GNU General Public License, version&nbsp;3 or
+later</a>.</p>
+<ul>
+  <li>W32Eleven contains no Microsoft code. <strong>Do not redistribute patched Windows ISOs</strong>: Windows is
+  Microsoft's copyrighted software. Share the tool and let everyone patch the ISO they downloaded from Microsoft,
+  as Rufus and Ventoy do. Windows still needs a valid license.</li>
+  <li>The patched disc embeds third-party free software: GRUB (GPLv3), SeaBIOS and the VGA BIOS (LGPLv3).
+  Distributing these binaries requires including or offering their source code and license notices.</li>
+</ul>
+
+<footer>W32Eleven · <a href="https://github.com/Banaxi-Tech/W32Eleven">github.com/Banaxi-Tech/W32Eleven</a> · <a href="/">Banaxi Tech</a></footer>
+</main>
+</div>
+<script>
+(function(){
+  var root=document.documentElement,btn=document.getElementById('theme');
+  try{var t=localStorage.getItem('theme');if(t)root.setAttribute('data-theme',t);}catch(e){}
+  btn.addEventListener('click',function(){
+    var dark=root.getAttribute('data-theme')?root.getAttribute('data-theme')==='dark':matchMedia('(prefers-color-scheme: dark)').matches;
+    var next=dark?'light':'dark';root.setAttribute('data-theme',next);
+    try{localStorage.setItem('theme',next);}catch(e){}
+  });
+})();
+</script>
+</body>
+</html>
