@@ -1,0 +1,47 @@
+---
+title: Making the boot media
+description: Patch a Windows 11 ISO so that it boots W32Eleven, and write it to a DVD or USB stick.
+---
+
+import { Steps, Tabs, TabItem } from '@astrojs/starlight/components';
+
+<Steps>
+
+1. Patch the ISO.
+
+   ```sh
+   python3 tools/w32-patch-iso.py Win11_x64.iso Win11_w32eleven.iso
+   ```
+
+   This copies the ISO and appends the emulator, SeaBIOS, the VGA BIOS, two small answer-file CDs and a GRUB boot
+   image. Everything already in the ISO stays byte for byte the same, including both file systems and the UEFI boot
+   entry, so UEFI PCs still boot Windows natively from the same disc.
+
+2. Write it to a DVD or a USB stick. The image is hybrid: the same file works for both.
+
+   <Tabs>
+     <TabItem label="USB stick">
+     ```sh
+     # replace sdX with the stick: everything on it is erased
+     sudo dd if=Win11_w32eleven.iso of=/dev/sdX bs=4M status=progress conv=fsync
+     ```
+     </TabItem>
+     <TabItem label="DVD">
+     Burn `Win11_w32eleven.iso` as an image with any burning program, for example:
+     ```sh
+     xorriso -as cdrecord -v dev=/dev/sr0 -dao Win11_w32eleven.iso
+     ```
+     </TabItem>
+   </Tabs>
+
+3. Boot the 32-bit PC from it and continue with [Installing Windows](/w32eleven/installing/).
+
+</Steps>
+
+:::caution[Don't share patched ISOs]
+Windows is Microsoft's copyrighted software. Share the tool, and let everyone patch the ISO they downloaded from
+Microsoft. See [License & legal](/w32eleven/license/).
+:::
+
+To undo the patch, run `python3 tools/w32-patch-iso.py --restore Win11_w32eleven.iso`. All options are in the
+[patch tool reference](/w32eleven/patch-tool/).

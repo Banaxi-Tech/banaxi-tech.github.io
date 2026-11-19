@@ -1,0 +1,35 @@
+---
+title: Testing in QEMU
+description: Try W32Eleven in QEMU on an emulated 32-bit PC, from a DVD or a USB stick.
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+QEMU's `qemu-system-i386` with KVM behaves like a 32-bit PC and is the quickest way to try W32Eleven.
+
+```sh
+truncate -s 64G disk.img
+```
+
+<Tabs>
+  <TabItem label="DVD">
+  ```sh
+  qemu-system-i386 -enable-kvm -cpu host -m 3G \
+    -cdrom Win11_w32eleven.iso \
+    -drive file=disk.img,format=raw,if=ide,index=0
+  ```
+  </TabItem>
+  <TabItem label="USB stick">
+  ```sh
+  qemu-system-i386 -enable-kvm -cpu host -m 3G \
+    -device usb-ehci,id=ehci \
+    -drive id=stick,file=Win11_w32eleven.iso,if=none,format=raw,readonly=on \
+    -device usb-storage,bus=ehci.0,drive=stick,bootindex=0 \
+    -drive file=disk.img,format=raw,if=ide,index=0
+  ```
+  </TabItem>
+</Tabs>
+
+:::tip
+More than 3 GB of RAM brings nothing: a 32-bit PC only sees the RAM below its PCI address range.
+:::

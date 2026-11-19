@@ -1,0 +1,19 @@
+/* Brand colours (Starlight accent scale) */
+:root {
+  --sl-color-accent-low: #12224a;
+  --sl-color-accent: #3b6fe0;
+  --sl-color-accent-high: #c3d4fb;
+}
+:root[data-theme='light'] {
+  --sl-color-accent-low: #d6e2fd;
+  --sl-color-accent: #2556c4;
+  --sl-color-accent-high: #142d66;
+}
+/* home page */
+.hero-tagline { max-width: 38rem; }
+.stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr)); gap: 0.75rem; margin-top: 1rem; }
+.stat-grid > div { border: 1px solid var(--sl-color-gray-5); border-radius: 0.75rem; padding: 0.9rem 1rem; background: var(--sl-color-black); }
+.stat-grid b { display: block; font-size: 1.5rem; color: var(--sl-color-white); line-height: 1.2; }
+.stat-grid span { font-size: 0.85rem; color: var(--sl-color-gray-3); }
+.stack-diagram { font-family: var(--sl-font-mono); font-size: 0.85rem; line-height: 1.6; white-space: pre; overflow-x: auto; border: 1px solid var(--sl-color-gray-5); border-radius: 0.75rem; padding: 1rem 1.2rem; background: var(--sl-color-black); }
+.hero img { border-radius: 0.9rem; box-shadow: 0 1.2rem 3rem -1rem rgb(0 0 0 / 0.35); }

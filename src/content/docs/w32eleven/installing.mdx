@@ -1,0 +1,54 @@
+---
+title: Installing Windows
+description: The boot menu, the automatic install and Windows Setup's graphical installer.
+---
+
+import { Steps } from '@astrojs/starlight/components';
+
+## The boot menu
+
+| Entry | What it does |
+| --- | --- |
+| Windows on W32Eleven – with this PC's hard disk | Windows Setup's graphical installer, with the PC's hard disk attached. This is the default. |
+| Windows on W32Eleven – CD only | The same, with no disk access, for trying it out safely. |
+| **AUTOMATIC install – ERASES the first hard disk** | Installs Windows 11 Pro with no questions asked. |
+| Install the W32Eleven boot loader on the hard disk | After installing: lets the PC start Windows without the DVD. See [Booting without the DVD](/w32eleven/boot-loader/). |
+| Reboot | Restarts the PC. |
+
+Setup's TPM, Secure Boot, RAM, CPU and storage checks are bypassed with Microsoft's documented `LabConfig`
+registry keys, from an `autounattend.xml` on a small virtual CD that only the emulated PC sees.
+
+:::note[The first screen takes minutes]
+The screen stays black or shows the Windows logo for several minutes before Setup's first screen appears. That's
+normal at the emulator's speed.
+:::
+
+## Automatic install
+
+:::danger[This erases the first hard disk without asking]
+Everything on the disk is lost.
+:::
+
+Instead of Setup's graphical installer, this entry runs a script inside Windows' installer environment (WinPE):
+
+<Steps>
+
+1. `diskpart` erases disk 0 and creates one NTFS partition.
+2. `dism` applies the Windows 11 Pro image. This is the longest step.
+3. The [slim settings](/w32eleven/slim-settings/) are written into the new installation.
+4. `bcdboot` installs the boot files, an answer file for the first start is copied in, and the PC restarts.
+5. Windows sets up its devices and restarts again.
+6. Windows creates a local account called **User** without a password and logs in automatically.
+
+</Steps>
+
+There are no screens to click through: no Microsoft account, no network, no privacy questions. Expect several
+hours in total.
+
+## Setup's graphical installer
+
+The default entry runs Windows Setup as usual, with the requirement checks bypassed. The emulated PC has two CPUs,
+because Setup refuses PCs with fewer than two cores. Choose the disk, and Setup installs and restarts as on any
+PC.
+
+When Windows is installed, continue with [Booting without the DVD](/w32eleven/boot-loader/).

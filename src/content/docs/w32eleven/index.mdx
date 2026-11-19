@@ -1,0 +1,46 @@
+---
+title: Introduction
+description: W32Eleven runs 64-bit Windows 11 on 32-bit x86 PCs with a bare-metal x86-64 emulator.
+---
+
+import { LinkCard, CardGrid } from '@astrojs/starlight/components';
+
+W32Eleven runs **64-bit Windows 11 on 32-bit PCs**. Windows 11 only exists for 64-bit CPUs, so W32Eleven emulates a
+complete x86-64 PC on CPUs that can't execute 64-bit code at all: anything from an i386 with an x87 FPU up, with no
+SSE and no 64-bit mode needed.
+
+Windows isn't modified. It sees an ordinary 64-bit PC with a BIOS, a VGA card, IDE disks, ACPI and two CPUs.
+
+<div class="stack-diagram">{`32-bit PC (for example a Core Duo or an Atom N450)
+└─ GRUB (from the patched DVD / USB stick, or from the hard disk)
+   └─ W32Eleven, bare metal, i386 + x87 only
+      └─ emulated x86-64 PC: SeaBIOS, VGA, IDE, ACPI, APIC, 2 CPUs
+         └─ Windows 11 (unmodified)`}</div>
+
+There's no Linux or other operating system underneath. The emulator is a small Multiboot kernel that GRUB loads
+directly, with its own drivers for disks, display and input.
+
+## Status
+
+| Area | State |
+| --- | --- |
+| Windows 11 x64 (build 26300) | Setup's graphical installer runs. The automatic install runs unattended from the DVD to the desktop, reboots included. The installed system boots to the desktop with the Start menu, Explorer and DWM composition. |
+| Booting | Patched DVD or USB stick → GRUB → W32Eleven → Windows, tested on QEMU emulating a 32-bit PC (i386 + KVM). The installed disk boots through the emulator without the DVD. |
+| Real hardware | **Not tested yet.** Reports are welcome. |
+
+:::caution[It's slow]
+W32Eleven averages about 525 million instructions per second on a fast modern CPU, roughly 1/100 of native speed,
+and a real 32-bit CPU is another 5–10× slower. Windows works, but slowly, and installing takes many hours. See
+[Performance](/w32eleven/performance/).
+:::
+
+## The guide
+
+Follow the pages in order to go from a Windows ISO to Windows 11 running on a 32-bit PC.
+
+<CardGrid>
+  <LinkCard title="Requirements" description="What you need to build it, and the PC to run Windows on." href="/w32eleven/requirements/" />
+  <LinkCard title="Building" description="Compile the emulator and run its self-tests." href="/w32eleven/building/" />
+  <LinkCard title="Making the boot media" description="Patch the Windows ISO and write it to a DVD or USB stick." href="/w32eleven/boot-media/" />
+  <LinkCard title="Installing Windows" description="The boot menu, the automatic install and Setup's GUI." href="/w32eleven/installing/" />
+</CardGrid>

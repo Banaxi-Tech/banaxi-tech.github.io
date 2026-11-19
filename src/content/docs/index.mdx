@@ -1,0 +1,55 @@
+---
+title: Banaxi Tech
+description: Banaxi Tech builds low-level software, like W32Eleven, which runs 64-bit Windows 11 on 32-bit PCs.
+template: splash
+editUrl: false
+lastUpdated: false
+hero:
+  tagline: Low-level software that makes old hardware do new things. Our current project, W32Eleven, runs 64-bit Windows 11 on 32-bit PCs.
+  image:
+    file: ../../assets/win11-start-menu.png
+    alt: The Windows 11 Start menu running inside W32Eleven
+  actions:
+    - text: Get started with W32Eleven
+      link: /w32eleven/
+      icon: right-arrow
+    - text: GitHub
+      link: https://github.com/Banaxi-Tech
+      icon: github
+      variant: minimal
+---
+
+import { Card, CardGrid, LinkCard } from '@astrojs/starlight/components';
+
+## W32Eleven
+
+An x86-64 PC emulator that runs directly on the hardware of 32-bit x86 machines. It boots from a patched Windows
+DVD or USB stick and translates Windows' 64-bit code into 32-bit code with its own JIT. Windows isn't modified: it
+sees an ordinary 64-bit PC.
+
+<CardGrid>
+  <Card title="No 64-bit CPU needed" icon="rocket">
+    Runs on any i386-or-later CPU with an x87 FPU: no SSE and no 64-bit mode.
+  </Card>
+  <Card title="Bare metal" icon="seti:c">
+    A small Multiboot kernel that GRUB loads directly, with no operating system underneath.
+  </Card>
+  <Card title="One patched ISO" icon="document">
+    The patch tool turns Microsoft's Windows 11 ISO into a DVD or USB stick that boots the emulator first.
+  </Card>
+  <Card title="Hands-off install" icon="setting">
+    An automatic install goes from the DVD to the desktop with no clicks, slimmed down for slow PCs.
+  </Card>
+</CardGrid>
+
+<div class="stat-grid">
+  <div><b>~525 MIPS</b><span>average while Windows boots</span></div>
+  <div><b>~2100 MIPS</b><span>peak</span></div>
+  <div><b>2 CPUs</b><span>emulated, time-sliced on one host core</span></div>
+  <div><b>GPL-3.0</b><span>free software</span></div>
+</div>
+
+<CardGrid>
+  <LinkCard title="Read the W32Eleven guide" description="Requirements, building, making the boot media and installing Windows." href="/w32eleven/" />
+  <LinkCard title="Source code" description="github.com/Banaxi-Tech/W32Eleven" href="https://github.com/Banaxi-Tech/W32Eleven" />
+</CardGrid>
